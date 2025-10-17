@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TrustFrameworkPolicy
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="http://schemas.microsoft.com/online/cpim/schemas/2013/06"
+    PolicySchemaVersion="0.3.0.0"
+  TenantId="zipzappmetadatadev.onmicrosoft.com"
+    PolicyId="B2C_1A_TrustFrameworkBase_v1_2_0"
+  PublicPolicyUri="http://zipzappmetadatadev.onmicrosoft.com/B2C_1A_TrustFrameworkBase_v1_2_0">
+
+  <!-- This is the root (base) policy for your tenant custom policy chain. It must NOT have a <BasePolicy> reference. -->
+
+  <BuildingBlocks>
+    <ClaimsSchema>
+      <ClaimType Id="signInName">
+        <DisplayName>Sign in name</DisplayName>
+        <DataType>string</DataType>
+        <UserHelpText>Email the user signs in with</UserHelpText>
+        <UserInputType>TextBox</UserInputType>
+      </ClaimType>
+      <ClaimType Id="email">
+        <DisplayName>Email Address</DisplayName>
+        <DataType>string</DataType>
+        <UserHelpText>User email address</UserHelpText>
+        <UserInputType>TextBox</UserInputType>
+      </ClaimType>
+      <ClaimType Id="givenName">
+        <DisplayName>Given Name</DisplayName>
+        <DataType>string</DataType>
+        <UserHelpText>User given name</UserHelpText>
+        <UserInputType>TextBox</UserInputType>
+      </ClaimType>
+      <ClaimType Id="surname">
+        <DisplayName>Surname</DisplayName>
+        <DataType>string</DataType>
+        <UserHelpText>User surname</UserHelpText>
+        <UserInputType>TextBox</UserInputType>
+      </ClaimType>
+      <ClaimType Id="displayName">
+        <DisplayName>Display Name</DisplayName>
+        <DataType>string</DataType>
+      </ClaimType>
+      <ClaimType Id="phoneNumber">
+        <DisplayName>Phone Number</DisplayName>
+        <DataType>string</DataType>
+      </ClaimType>
+      <ClaimType Id="correlationId">
+        <DisplayName>Correlation Identifier</DisplayName>
+        <DataType>string</DataType>
+        <DefaultPartnerClaimTypes>
+          <Protocol Name="OAuth2" PartnerClaimType="correlation_id" />
+        </DefaultPartnerClaimTypes>
+      </ClaimType>
+      <ClaimType Id="idempotencyKey">
+        <DisplayName>Idempotency Key</DisplayName>
+        <DataType>string</DataType>
+      </ClaimType>
+      <ClaimType Id="crmContactId">
+        <DisplayName>CRM Contact Identifier</DisplayName>
+        <DataType>string</DataType>
+      </ClaimType>
+      <ClaimType Id="idmUserId">
+        <DisplayName>IDM User Identifier</DisplayName>
+        <DataType>string</DataType>
+      </ClaimType>
+      <ClaimType Id="idmUserExists">
+        <DisplayName>IDM User Exists</DisplayName>
+        <DataType>string</DataType>
+      </ClaimType>
+      <ClaimType Id="crmStatus">
+        <DisplayName>CRM Status</DisplayName>
+        <DataType>string</DataType>
+      </ClaimType>
+      <ClaimType Id="journeyErrorMessage">
+        <DisplayName>Journey Error Message</DisplayName>
+        <DataType>string</DataType>
+      </ClaimType>
+      <ClaimType Id="journeyErrorCode">
+        <DisplayName>Journey Error Code</DisplayName>
+        <DataType>string</DataType>
+      </ClaimType>
+      <ClaimType Id="journeyRetryAfter">
+        <DisplayName>Journey Retry After Seconds</DisplayName>
+        <DataType>string</DataType>
+      </ClaimType>
+      <ClaimType Id="journeyHasError">
+        <DisplayName>Journey Has Error</DisplayName>
+        <DataType>boolean</DataType>
+      </ClaimType>
+      <ClaimType Id="journeySupportLink">
+        <DisplayName>Journey Support Link</DisplayName>
+        <DataType>string</DataType>
+      </ClaimType>
+      <ClaimType Id="legacyPasswordValidated">
+        <DisplayName>Legacy Password Validated</DisplayName>
+        <DataType>boolean</DataType>
+      </ClaimType>
+    </ClaimsSchema>
+
+    <ClaimsTransformations>
+      <ClaimsTransformation Id="CreateCorrelationId" TransformationMethod="GenerateGuid">
+        <OutputClaims>
+          <OutputClaim ClaimTypeReferenceId="correlationId" TransformationClaimType="generatedGuid" />
+        </OutputClaims>
+      </ClaimsTransformation>
+      <ClaimsTransformation Id="CreateIdempotencyKey" TransformationMethod="GenerateGuid">
+        <OutputClaims>
+          <OutputClaim ClaimTypeReferenceId="idempotencyKey" TransformationClaimType="generatedGuid" />
+        </OutputClaims>
+      </ClaimsTransformation>
+      <ClaimsTransformation Id="CopyEmailToSignInName" TransformationMethod="CopyClaim">
+        <InputClaims>
+          <InputClaim ClaimTypeReferenceId="email" TransformationClaimType="inputClaim" />
+        </InputClaims>
+        <OutputClaims>
+          <OutputClaim ClaimTypeReferenceId="signInName" TransformationClaimType="outputClaim" />
+        </OutputClaims>
+      </ClaimsTransformation>
+      <ClaimsTransformation Id="BuildDisplayName" TransformationMethod="FormatStringMultipleClaims">
+        <InputClaims>
+          <InputClaim ClaimTypeReferenceId="givenName" TransformationClaimType="inputClaim1" />
+          <InputClaim ClaimTypeReferenceId="surname" TransformationClaimType="inputClaim2" />
+        </InputClaims>
+        <InputParameters>
+          <InputParameter Id="stringFormat" DataType="string" Value="{0} {1}" />
+        </InputParameters>
+        <OutputClaims>
+          <OutputClaim ClaimTypeReferenceId="displayName" TransformationClaimType="outputClaim" />
+        </OutputClaims>
+      </ClaimsTransformation>
+      <ClaimsTransformation Id="CreateSupportLink" TransformationMethod="CreateStringClaim">
+        <InputParameters>
+          <InputParameter Id="value" DataType="string" Value="https://support.example.com/ticket" />
+        </InputParameters>
+        <OutputClaims>
+          <OutputClaim ClaimTypeReferenceId="journeySupportLink" TransformationClaimType="createdClaim" />
+        </OutputClaims>
+      </ClaimsTransformation>
+    </ClaimsTransformations>
+
+    <ContentDefinitions>
+      <ContentDefinition Id="api.error">
+        <!-- Replace with your deployed static content hosting endpoint if customizing error UI -->
+        <LoadUri>https://sacontosotransit001.blob.core.windows.net/b2c/error.html</LoadUri>
+        <DataUri>urn:com:microsoft:aad:b2c:elements:contract:selfasserted:1.2.0</DataUri>
+        <Metadata>
+          <Item Key="DisplayName">Custom Error Page</Item>
+        </Metadata>
+      </ContentDefinition>
+    </ContentDefinitions>
+  </BuildingBlocks>
+
+  <ClaimsProviders>
+    <ClaimsProvider>
+      <DisplayName>Local Accounts</DisplayName>
+      <TechnicalProfiles>
+        <TechnicalProfile Id="LocalAccountSignUpWithLogonEmail">
+          <DisplayName>Email sign up</DisplayName>
+          <Protocol Name="Proprietary" Handler="Web.TPEngine.Providers.LocalAccountProvider,Web.TPEngine" />
+          <Metadata>
+            <Item Key="IpAddressClaimReferenceId">ipAddress</Item>
+            <Item Key="ContentDefinitionReferenceId">api.localaccountsignup</Item>
+          </Metadata>
+          <InputClaimsTransformations>
+            <InputClaimsTransformation ReferenceId="CreateCorrelationId" />
+            <InputClaimsTransformation ReferenceId="CreateIdempotencyKey" />
+            <InputClaimsTransformation ReferenceId="CreateSupportLink" />
+          </InputClaimsTransformations>
+          <OutputClaims>
+            <OutputClaim ClaimTypeReferenceId="signInName" Required="true" />
+            <OutputClaim ClaimTypeReferenceId="email" Required="true" />
+            <OutputClaim ClaimTypeReferenceId="givenName" />
+            <OutputClaim ClaimTypeReferenceId="surname" />
+            <OutputClaim ClaimTypeReferenceId="phoneNumber" />
+            <OutputClaim ClaimTypeReferenceId="correlationId" />
+            <OutputClaim ClaimTypeReferenceId="idempotencyKey" />
+          </OutputClaims>
+          <OutputClaimsTransformations>
+            <OutputClaimsTransformation ReferenceId="CopyEmailToSignInName" />
+            <OutputClaimsTransformation ReferenceId="BuildDisplayName" />
+          </OutputClaimsTransformations>
+        </TechnicalProfile>
+
+        <TechnicalProfile Id="SelfAsserted-ErrorHandler">
+          <DisplayName>Error Handler</DisplayName>
+          <Protocol Name="Proprietary" Handler="Web.TPEngine.Providers.SelfAssertedAttributeProvider,Web.TPEngine" />
+          <Metadata>
+            <Item Key="ContentDefinitionReferenceId">api.error</Item>
+            <Item Key="Setting.CollectAttributeVerificationEvidence">false</Item>
+          </Metadata>
+          <InputClaims>
+            <InputClaim ClaimTypeReferenceId="correlationId" />
+            <InputClaim ClaimTypeReferenceId="journeyErrorCode" />
+            <InputClaim ClaimTypeReferenceId="journeyErrorMessage" />
+            <InputClaim ClaimTypeReferenceId="journeyRetryAfter" />
+            <InputClaim ClaimTypeReferenceId="journeySupportLink" />
+          </InputClaims>
+          <OutputClaims>
+            <OutputClaim ClaimTypeReferenceId="correlationId" />
+          </OutputClaims>
+        </TechnicalProfile>
+      </TechnicalProfiles>
+    </ClaimsProvider>
+  </ClaimsProviders>
+</TrustFrameworkPolicy>

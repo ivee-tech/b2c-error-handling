@@ -1,0 +1,22 @@
+[
+  {
+    "email": "alice.legacy@example.com",
+    "userId": "idm-alice-001",
+    "blocked": false
+  },
+  {
+    "email": "bob.exists@example.com",
+    "userId": "idm-bob-002",
+    "blocked": false
+  },
+  {
+    "email": "carol.blocked@example.com",
+    "userId": "idm-carol-003",
+    "blocked": true
+  },
+  {
+    "email": "radudanielro@yahoo.com",
+    "userId": "idm-raduda-004",
+    "blocked": false
+  }
+]

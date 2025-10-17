@@ -1,0 +1,253 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<TrustFrameworkPolicy 
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+  xmlns="http://schemas.microsoft.com/online/cpim/schemas/2013/06" 
+  PolicySchemaVersion="0.3.0.0" 
+  TenantId="zipzappmetadatadev.onmicrosoft.com" 
+  PolicyId="B2C_1A_TrustFrameworkExtensions" 
+  PublicPolicyUri="http://zipzappmetadatadev.onmicrosoft.com/B2C_1A_TrustFrameworkExtensions">
+  
+  <BasePolicy>
+    <TenantId>zipzappmetadatadev.onmicrosoft.com</TenantId>
+    <PolicyId>B2C_1A_TrustFrameworkLocalization</PolicyId>
+  </BasePolicy>
+  <BuildingBlocks>
+    <ClaimsSchema>
+      <!-- Claims introduced for REST user validation integration -->
+      <ClaimType Id="correlationId">
+        <DisplayName>Correlation Id</DisplayName>
+        <DataType>string</DataType>
+        <UserHelpText>Correlation identifier for diagnostics.</UserHelpText>
+      </ClaimType>
+      <ClaimType Id="userExists">
+        <DisplayName>User Exists</DisplayName>
+        <DataType>boolean</DataType>
+      </ClaimType>
+      <ClaimType Id="userId">
+        <DisplayName>Validated User Id</DisplayName>
+        <DataType>string</DataType>
+      </ClaimType>
+      <ClaimType Id="userMessage">
+        <DisplayName>User Message</DisplayName>
+        <DataType>string</DataType>
+      </ClaimType>
+      <ClaimType Id="errorCode">
+        <DisplayName>Error Code</DisplayName>
+        <DataType>string</DataType>
+      </ClaimType>
+      <ClaimType Id="journeyHasError">
+        <DisplayName>Journey Has Error</DisplayName>
+        <DataType>boolean</DataType>
+      </ClaimType>
+      <ClaimType Id="retryAfter">
+        <DisplayName>Retry After Seconds</DisplayName>
+        <DataType>int</DataType>
+      </ClaimType>
+    </ClaimsSchema>
+
+    <ClaimsTransformations>
+      <!-- Raise an error if journeyHasError is true -->
+      <ClaimsTransformation Id="AssertJourneyHasNoError" TransformationMethod="AssertBooleanClaimIsEqualToValue">
+        <InputClaims>
+          <InputClaim ClaimTypeReferenceId="journeyHasError" TransformationClaimType="inputClaim" />
+        </InputClaims>
+        <InputParameters>
+          <InputParameter Id="valueToCompareTo" DataType="boolean" Value="false" />
+        </InputParameters>
+      </ClaimsTransformation>
+    </ClaimsTransformations>
+
+    <!-- Override error page to point to custom content (placeholder URL – update to deployed location of content/error.html) -->
+    <ContentDefinitions>
+      <!-- Re-declare existing content definition with same Id to override; 'Override' attribute is not supported -->
+      <ContentDefinition Id="api.error">
+        <LoadUri>https://sacontosotransit001.blob.core.windows.net/b2c/error.html</LoadUri>
+        <RecoveryUri>~/common/default_page_error.html</RecoveryUri>
+        <DataUri>urn:com:microsoft:aad:b2c:elements:contract:globalexception:1.2.1</DataUri>
+        <Metadata>
+          <Item Key="DisplayName">Custom Error page</Item>
+        </Metadata>
+      </ContentDefinition>
+      <!-- Add explicit signup content definition (referenced by LocalAccountSignUpWithLogonEmail) -->
+      <ContentDefinition Id="api.localaccountsignup">
+        <LoadUri>https://sacontosotransit001.blob.core.windows.net/b2c/unified.html</LoadUri>
+        <RecoveryUri>~/common/default_page_error.html</RecoveryUri>
+        <DataUri>urn:com:microsoft:aad:b2c:elements:contract:selfasserted:2.1.7</DataUri>
+        <Metadata>
+          <Item Key="DisplayName">Custom Local Account Sign Up</Item>
+        </Metadata>
+      </ContentDefinition>
+      <!-- Custom inline sign-in page to surface rich REST/AAD error details without redirect -->
+      <ContentDefinition Id="api.localaccountsignin">
+        <LoadUri>https://sacontosotransit001.blob.core.windows.net/b2c/signin.html</LoadUri>
+        <RecoveryUri>~/common/default_page_error.html</RecoveryUri>
+        <DataUri>urn:com:microsoft:aad:b2c:elements:contract:selfasserted:2.1.7</DataUri>
+        <Metadata>
+          <Item Key="DisplayName">Custom Local Account Sign In</Item>
+        </Metadata>
+      </ContentDefinition>
+      <!-- Override unified signup/signin content (CombinedSignInAndSignUp step uses this) -->
+      <ContentDefinition Id="api.signuporsignin">
+        <!-- Switch to full unified.html with version bump and cache buster to test contract upgrade -->
+        <LoadUri>https://sacontosotransit001.blob.core.windows.net/b2c/unified.html</LoadUri>
+        <RecoveryUri>~/common/default_page_error.html</RecoveryUri>
+        <DataUri>urn:com:microsoft:aad:b2c:elements:contract:unifiedssp:2.1.7</DataUri>
+        <Metadata>
+          <Item Key="DisplayName">Custom Unified SignIn/SignUp</Item>
+        </Metadata>
+      </ContentDefinition>
+    </ContentDefinitions>
+  </BuildingBlocks>
+
+  <ClaimsProviders>
+
+    <!-- Override existing technical profile to inject REST validation in signup flow -->
+    <ClaimsProvider>
+      <DisplayName>Local Account</DisplayName>
+      <TechnicalProfiles>
+        <!-- Full override to insert REST validation prior to AAD write -->
+        <TechnicalProfile Id="LocalAccountSignUpWithLogonEmail">
+          <DisplayName>Email signup (with REST validation)</DisplayName>
+          <Protocol Name="Proprietary" Handler="Web.TPEngine.Providers.SelfAssertedAttributeProvider, Web.TPEngine, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" />
+          <Metadata>
+            <Item Key="IpAddressClaimReferenceId">IpAddress</Item>
+            <Item Key="ContentDefinitionReferenceId">api.localaccountsignup</Item>
+          </Metadata>
+          <CryptographicKeys>
+            <Key Id="issuer_secret" StorageReferenceId="B2C_1A_TokenSigningKeyContainer" />
+          </CryptographicKeys>
+          <InputClaims>
+            <InputClaim ClaimTypeReferenceId="email" />
+          </InputClaims>
+          <OutputClaims>
+            <OutputClaim ClaimTypeReferenceId="objectId" />
+            <OutputClaim ClaimTypeReferenceId="email" PartnerClaimType="Verified.Email" Required="true" />
+            <OutputClaim ClaimTypeReferenceId="newPassword" Required="true" />
+            <OutputClaim ClaimTypeReferenceId="reenterPassword" Required="true" />
+            <OutputClaim ClaimTypeReferenceId="executed-SelfAsserted-Input" DefaultValue="true" />
+            <OutputClaim ClaimTypeReferenceId="authenticationSource" />
+            <OutputClaim ClaimTypeReferenceId="newUser" />
+            <!-- Optional claims, to be collected from the user -->
+            <OutputClaim ClaimTypeReferenceId="displayName" />
+            <OutputClaim ClaimTypeReferenceId="givenName" />
+            <OutputClaim ClaimTypeReferenceId="surName" />
+            <!-- REST output claims (not persisted) -->
+            <OutputClaim ClaimTypeReferenceId="userExists" />
+            <OutputClaim ClaimTypeReferenceId="userId" />
+            <OutputClaim ClaimTypeReferenceId="userMessage" />
+            <OutputClaim ClaimTypeReferenceId="errorCode" />
+            <OutputClaim ClaimTypeReferenceId="journeyHasError" />
+            <OutputClaim ClaimTypeReferenceId="retryAfter" />
+          </OutputClaims>
+          <ValidationTechnicalProfiles>
+            <!-- Invoke REST validation first -->
+            <ValidationTechnicalProfile ReferenceId="REST-UserValidation" />
+            <!-- Proceed with AAD write on success -->
+            <ValidationTechnicalProfile ReferenceId="AAD-UserWriteUsingLogonEmail" />
+          </ValidationTechnicalProfiles>
+          <UseTechnicalProfileForSessionManagement ReferenceId="SM-AAD" />
+        </TechnicalProfile>
+        <!-- Minimal override of sign-in profile: add REST-UserValidation before password validation -->
+        <TechnicalProfile Id="SelfAsserted-LocalAccountSignin-Email">
+          <DisplayName>Local Account Signin</DisplayName>
+          <Protocol Name="Proprietary" Handler="Web.TPEngine.Providers.SelfAssertedAttributeProvider, Web.TPEngine, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" />
+          <Metadata>
+            <Item Key="SignUpTarget">SignUpWithLogonEmailExchange</Item>
+            <Item Key="setting.operatingMode">Email</Item>
+            <Item Key="ContentDefinitionReferenceId">api.localaccountsignin</Item>
+            <Item Key="IncludeClaimResolvingInClaimsHandling">true</Item>
+          </Metadata>
+          <IncludeInSso>false</IncludeInSso>
+          <InputClaims>
+            <InputClaim ClaimTypeReferenceId="signInName" DefaultValue="{OIDC:LoginHint}" AlwaysUseDefaultValue="true" />
+          </InputClaims>
+          <OutputClaims>
+            <OutputClaim ClaimTypeReferenceId="signInName" Required="true" />
+            <OutputClaim ClaimTypeReferenceId="password" Required="true" />
+            <OutputClaim ClaimTypeReferenceId="objectId" />
+            <OutputClaim ClaimTypeReferenceId="authenticationSource" />
+          </OutputClaims>
+          <ValidationTechnicalProfiles>
+            <ValidationTechnicalProfile ReferenceId="REST-UserValidation" />
+            <ValidationTechnicalProfile ReferenceId="login-NonInteractive" />
+          </ValidationTechnicalProfiles>
+          <UseTechnicalProfileForSessionManagement ReferenceId="SM-AAD" />
+        </TechnicalProfile>
+      </TechnicalProfiles>
+    </ClaimsProvider>
+
+    <!-- REST API claims provider -->
+    <ClaimsProvider>
+      <DisplayName>User Validation API</DisplayName>
+      <TechnicalProfiles>
+        <TechnicalProfile Id="REST-UserValidation">
+          <DisplayName>User validation REST call</DisplayName>
+          <Protocol Name="Proprietary" Handler="Web.TPEngine.Providers.RestfulProvider, Web.TPEngine, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" />
+          <Metadata>
+            <!-- Update ServiceUrl to your deployed API base URL -->
+            <Item Key="ServiceUrl">https://contoso-transit-api-dev-eba5fcfughcfg0c0.australiaeast-01.azurewebsites.net/users/validate</Item>
+            <Item Key="SendClaimsIn">Body</Item>
+            <Item Key="AuthenticationType">Basic</Item>
+            <Item Key="AllowInsecureAuthInProduction">false</Item>
+            <Item Key="IncludeClaimResolvingInClaimsHandling">true</Item>
+            <Item Key="ResolveJsonPathsInJsonTokens">true</Item>
+            <Item Key="Timeout">20</Item>
+            <!-- Force these HTTP status codes from the REST API to raise a journey error and trigger global error page (api.error) -->
+            <Item Key="RaiseErrorResponseCodes">400,404,408,409</Item>
+          </Metadata>
+          <CryptographicKeys>
+            <!-- Create these policy keys in B2C: B2C_1A_IdmApiBasicUsername / B2C_1A_IdmApiBasicPassword -->
+            <Key Id="BasicAuthenticationUsername" StorageReferenceId="B2C_1A_IdmApiBasicUsername" />
+            <Key Id="BasicAuthenticationPassword" StorageReferenceId="B2C_1A_IdmApiBasicPassword" />
+          </CryptographicKeys>
+          <InputClaims>
+            <InputClaim ClaimTypeReferenceId="email" PartnerClaimType="email" />
+            <InputClaim ClaimTypeReferenceId="correlationId" DefaultValue="{Context:CorrelationId}" AlwaysUseDefaultValue="true" />
+            <!-- Allow sign-in journeys (which use signInName) to reuse this REST call without extra transformations -->
+            <InputClaim ClaimTypeReferenceId="signInName" PartnerClaimType="email" />
+          </InputClaims>
+          <OutputClaims>
+            <OutputClaim ClaimTypeReferenceId="userExists" />
+            <OutputClaim ClaimTypeReferenceId="userId" />
+            <OutputClaim ClaimTypeReferenceId="userMessage" />
+            <OutputClaim ClaimTypeReferenceId="errorCode" />
+            <OutputClaim ClaimTypeReferenceId="journeyHasError" />
+            <OutputClaim ClaimTypeReferenceId="retryAfter" />
+          </OutputClaims>
+          <OutputClaimsTransformations>
+            <OutputClaimsTransformation ReferenceId="AssertJourneyHasNoError" />
+          </OutputClaimsTransformations>
+          <UseTechnicalProfileForSessionManagement ReferenceId="SM-Noop" />
+        </TechnicalProfile>
+      </TechnicalProfiles>
+    </ClaimsProvider>
+
+    <!-- Override login-NonInteractive to add required client_id and audience metadata.
+         IMPORTANT: Replace the placeholder values ProxyIdentityExperienceFrameworkAppId and
+         IdentityExperienceFrameworkAppId with the actual Application (client) IDs of your
+         ProxyIdentityExperienceFramework (public/native) and IdentityExperienceFramework (web) app registrations
+         before uploading. -->
+    <ClaimsProvider>
+      <DisplayName>Local Account SignIn Override</DisplayName>
+      <TechnicalProfiles>
+        <TechnicalProfile Id="login-NonInteractive">
+          <Metadata>
+            <Item Key="client_id">4cc1fdd8-f403-4923-8854-15fe3b0c47f9</Item>
+            <Item Key="IdTokenAudience">c3618c04-47db-43ed-ae6c-8b86d32a239f</Item>
+          </Metadata>
+          <InputClaims>
+            <InputClaim ClaimTypeReferenceId="client_id" DefaultValue="4cc1fdd8-f403-4923-8854-15fe3b0c47f9" />
+            <InputClaim ClaimTypeReferenceId="resource_id" PartnerClaimType="resource" DefaultValue="c3618c04-47db-43ed-ae6c-8b86d32a239f" />
+          </InputClaims>
+        </TechnicalProfile>
+      </TechnicalProfiles>
+    </ClaimsProvider>
+
+  </ClaimsProviders>
+
+    <!--UserJourneys>
+	
+	</UserJourneys-->
+
+</TrustFrameworkPolicy>

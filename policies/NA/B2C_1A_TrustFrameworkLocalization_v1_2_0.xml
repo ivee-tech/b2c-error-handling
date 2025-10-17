@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TrustFrameworkPolicy
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="http://schemas.microsoft.com/online/cpim/schemas/2013/06"
+    PolicySchemaVersion="0.3.0.0"
+  TenantId="zipzappmetadatadev.onmicrosoft.com"
+    PolicyId="B2C_1A_TrustFrameworkLocalization_v1_2_0"
+  PublicPolicyUri="http://zipzappmetadatadev.onmicrosoft.com/B2C_1A_TrustFrameworkLocalization_v1_2_0">
+
+  <BasePolicy>
+    <TenantId>zipzappmetadatadev.onmicrosoft.com</TenantId>
+    <PolicyId>B2C_1A_TrustFrameworkBase_v1_2_0</PolicyId>
+  </BasePolicy>
+
+  <Localization Enabled="true">
+    <SupportedLanguages DefaultLanguage="en">
+      <SupportedLanguage>en</SupportedLanguage>
+    </SupportedLanguages>
+
+    <LocalizedResources Id="api.error.en">
+      <LocalizedStrings>
+        <LocalizedString ElementType="UxElement" StringId="heading">We hit a snag</LocalizedString>
+        <LocalizedString ElementType="UxElement" StringId="intro">We could not complete your request right now. Your reference ID is {0}.</LocalizedString>
+        <LocalizedString ElementType="UxElement" StringId="button_retry">Try again</LocalizedString>
+        <LocalizedString ElementType="UxElement" StringId="support_link_text">Contact Support</LocalizedString>
+        <LocalizedString ElementType="ErrorMessage" StringId="error.crm.timeout">We're experiencing high demand. Please try again in a few moments.</LocalizedString>
+        <LocalizedString ElementType="ErrorMessage" StringId="error.crm.duplicate">An account with this email already exists. Please sign in instead.</LocalizedString>
+        <LocalizedString ElementType="ErrorMessage" StringId="error.crm.unavailable">Our systems are temporarily unavailable. Please try again later.</LocalizedString>
+        <LocalizedString ElementType="ErrorMessage" StringId="error.crm.general">Something went wrong. Please contact support with reference: {0}</LocalizedString>
+      </LocalizedStrings>
+    </LocalizedResources>
+
+    <LocalizedResources Id="api.localaccountsignup.en">
+      <LocalizedStrings>
+        <LocalizedString ElementType="UxElement" StringId="title">Create your Auckland Transport account</LocalizedString>
+        <LocalizedString ElementType="UxElement" StringId="heading">Sign up</LocalizedString>
+        <LocalizedString ElementType="UxElement" StringId="email_intro">Enter your email address.</LocalizedString>
+        <LocalizedString ElementType="UxElement" StringId="password_intro">Create a strong password.</LocalizedString>
+        <LocalizedString ElementType="UxElement" StringId="givenName_intro">What's your first name?</LocalizedString>
+        <LocalizedString ElementType="UxElement" StringId="surname_intro">What's your last name?</LocalizedString>
+        <LocalizedString ElementType="UxElement" StringId="button_continue">Continue</LocalizedString>
+        <LocalizedString ElementType="UxElement" StringId="correlation_hint">Reference ID: {0}</LocalizedString>
+      </LocalizedStrings>
+    </LocalizedResources>
+  </Localization>
+</TrustFrameworkPolicy>

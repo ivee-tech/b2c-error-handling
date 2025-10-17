@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TrustFrameworkPolicy
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="http://schemas.microsoft.com/online/cpim/schemas/2013/06"
+    PolicySchemaVersion="0.3.0.0"
+  TenantId="zipzappmetadatadev.onmicrosoft.com"
+  PolicyId="B2C_1A_SignUpSignIn"
+  PublicPolicyUri="http://zipzappmetadatadev.onmicrosoft.com/B2C_1A_SignUpSignIn">
+
+  <BasePolicy>
+    <TenantId>zipzappmetadatadev.onmicrosoft.com</TenantId>
+    <PolicyId>B2C_1A_TrustFrameworkExtensions_v1_2_0</PolicyId>
+  </BasePolicy>
+
+  <RelyingParty>
+    <DefaultUserJourney ReferenceId="SignUpSignIn" />
+    <UserJourneyBehaviors>
+      <SingleSignOn Scope="Tenant" />
+      <SessionExpiryType>Absolute</SessionExpiryType>
+      <SessionExpiryInSeconds>14400</SessionExpiryInSeconds>
+    </UserJourneyBehaviors>
+    <TechnicalProfile Id="PolicyProfile">
+      <DisplayName>Sign up or sign in</DisplayName>
+      <Protocol Name="OpenIdConnect" />
+      <Metadata>
+        <Item Key="response_types">code</Item>
+        <Item Key="response_mode">form_post</Item>
+        <Item Key="grant_types">authorization_code</Item>
+        <Item Key="scope">openid offline_access profile email</Item>
+      </Metadata>
+      <OutputClaims>
+        <OutputClaim ClaimTypeReferenceId="signInName" PartnerClaimType="login_hint" />
+        <OutputClaim ClaimTypeReferenceId="email" />
+        <OutputClaim ClaimTypeReferenceId="givenName" />
+        <OutputClaim ClaimTypeReferenceId="surname" />
+        <OutputClaim ClaimTypeReferenceId="displayName" />
+        <OutputClaim ClaimTypeReferenceId="crmContactId" />
+        <OutputClaim ClaimTypeReferenceId="idmUserId" />
+        <OutputClaim ClaimTypeReferenceId="correlationId" />
+      </OutputClaims>
+      <SubjectNamingInfo ClaimType="sub" />
+    </TechnicalProfile>
+  </RelyingParty>
+</TrustFrameworkPolicy>

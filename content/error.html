@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>We're sorry — Something went wrong</title>
+  <meta http-equiv="Cache-Control" content="no-store" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <!-- Optional: Apply a CSP when hosting (adjust domain paths accordingly) -->
+  <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; img-src 'self' data:;"> -->
+  <style>
+    :root {
+      --font-stack: system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji;
+      --color-bg: #0f1115;
+      --color-surface: #1b1f24;
+      --color-surface-alt: #242a31;
+      --color-border: #374151;
+      --color-accent: #6366f1;
+      --color-accent-hover: #818cf8;
+      --color-text: #f3f4f6;
+      --color-text-dim: #9ca3af;
+      --color-danger: #f87171;
+      --radius: 12px;
+      --space: 1rem;
+      color-scheme: light dark;
+    }
+    [data-theme="light"]:root {
+      --color-bg: #f5f7fa;
+      --color-surface: #ffffff;
+      --color-surface-alt: #f1f5f9;
+      --color-border: #d1d9e0;
+      --color-text: #1f2933;
+      --color-text-dim: #4b5563;
+      --color-danger: #dc2626;
+    }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family: var(--font-stack); background: var(--color-bg); color: var(--color-text); -webkit-font-smoothing: antialiased; }
+    header { padding: clamp(1rem,2vw,2rem) clamp(1rem,3vw,3rem); }
+    header h1 { margin:0; font-size: clamp(1.5rem,3vw,2.25rem); line-height:1.2; font-weight:600; }
+    main { max-width:880px; margin:0 auto; padding:0 clamp(1rem,3vw,3rem) 3rem; }
+    .panel { background: var(--color-surface); border:1px solid var(--color-border); border-radius: var(--radius); padding:clamp(1.25rem,2.2vw,2.25rem) clamp(1.25rem,2.3vw,2.5rem); box-shadow: 0 4px 18px -6px rgba(0,0,0,.35), 0 1px 2px rgba(0,0,0,.3); }
+    .summary { display:flex; gap:1rem; align-items:flex-start; }
+    .summary-icon { flex: 0 0 auto; width:56px; height:56px; border-radius:14px; display:grid; place-items:center; background:linear-gradient(145deg,#ef4444,#b91c1c); color:#fff; font-size:30px; box-shadow:0 4px 14px -4px rgba(239,68,68,.6); }
+    h2 { margin:0 0 .75rem; font-size:clamp(1.1rem,2vw,1.35rem); font-weight:600; }
+    p { line-height:1.5; margin:0 0 1rem; }
+    code.inline { background: var(--color-surface-alt); padding:.2rem .45rem; border-radius:6px; font-size:.85rem; word-break:break-all; color: var(--color-accent); }
+    .meta-grid { display:grid; gap:.85rem; grid-template-columns: repeat(auto-fit,minmax(240px,1fr)); margin:2rem 0 1.5rem; }
+    .meta-item { background: var(--color-surface-alt); border:1px solid var(--color-border); border-radius:10px; padding:.85rem 1rem .95rem; font-size:.8rem; line-height:1.3; position:relative; }
+    .meta-item h3 { margin:0 0 .4rem; font-size:.7rem; letter-spacing:.05em; text-transform:uppercase; font-weight:600; color: var(--color-text-dim); }
+    .meta-value { font-size:.9rem; font-weight:500; word-break:break-word; }
+    .actions { display:flex; flex-wrap:wrap; gap:.75rem; margin-top:1.25rem; }
+    button, a.button { --btn-bg: var(--color-accent); --btn-bg-hover: var(--color-accent-hover); cursor:pointer; padding:.85rem 1.2rem; background: var(--btn-bg); color:#fff; font-weight:600; font-size:.9rem; border:0; border-radius:10px; display:inline-flex; gap:.5rem; align-items:center; line-height:1; text-decoration:none; box-shadow:0 4px 14px -4px rgba(99,102,241,.55), 0 2px 4px -2px rgba(0,0,0,.4); transition:.2s; }
+    button:hover, a.button:hover { background: var(--btn-bg-hover); transform:translateY(-2px); box-shadow:0 6px 18px -6px rgba(129,140,248,.65), 0 4px 10px -4px rgba(0,0,0,.5); }
+    button.secondary { --btn-bg: var(--color-surface-alt); --btn-bg-hover: var(--color-accent); color: var(--color-text); border:1px solid var(--color-border); box-shadow:none; }
+    footer { margin:3rem 0 2rem; text-align:center; font-size:.7rem; color: var(--color-text-dim); }
+    .support-link { word-break: break-word; }
+    .hidden { display:none !important; }
+    .retry-hint { color: var(--color-text-dim); font-size:.8rem; margin-top:.25rem; }
+    @media (max-width:640px){
+      .summary { flex-direction:column; }
+      .summary-icon { width:64px; height:64px; font-size:34px; }
+    }
+    .fade-in { animation:fade .5s ease; }
+    @keyframes fade { from { opacity:0; transform:translateY(6px);} to {opacity:1; transform:none;} }
+  </style>
+</head>
+<body>
+  <header>
+    <h1 aria-describedby="error-context">Account Experience Error</h1>
+  </header>
+  <main>
+    <section class="panel fade-in" aria-live="polite" aria-atomic="true">
+      <div class="summary">
+        <div class="summary-icon" aria-hidden="true">!</div>
+        <div class="summary-text">
+          <h2 id="error-context">We hit a snag completing your request.</h2>
+          <p id="js-userMessage" class="user-message">You can safely close this window. If the problem continues, share the reference ID with support.</p>
+          <p class="hidden" id="js-retryAfterWrap">Please wait <strong id="js-retryAfter"></strong> seconds before trying again.</p>
+        </div>
+      </div>
+      <div class="meta-grid" role="group" aria-label="Diagnostic information">
+        <div class="meta-item" id="meta-correlation" aria-live="off">
+          <h3>Correlation ID</h3>
+          <div class="meta-value" id="js-correlationId">—</div>
+        </div>
+        <div class="meta-item" id="meta-code">
+          <h3>Error Code</h3>
+          <div class="meta-value" id="js-errorCode">—</div>
+        </div>
+        <div class="meta-item" id="meta-support">
+          <h3>Support</h3>
+          <div class="meta-value support-link" id="js-supportLink">—</div>
+        </div>
+        <div class="meta-item" id="meta-timestamp">
+          <h3>Timestamp (UTC)</h3>
+          <div class="meta-value" id="js-timestamp">—</div>
+        </div>
+      </div>
+      <div class="actions" role="group" aria-label="Actions">
+        <button type="button" id="btnRetry" class="secondary">Try Again</button>
+        <button type="button" id="btnClose">Close Window</button>
+      </div>
+      <div class="retry-hint" id="js-retryHint" hidden>Retry is disabled until the wait time elapses.</div>
+      <details id="technicalDetails" style="margin-top:2rem;">
+        <summary style="cursor:pointer;font-weight:600;">Technical details (for support)</summary>
+        <div style="margin-top:1rem; font-size:.8rem; line-height:1.4; background:var(--color-surface-alt); border:1px solid var(--color-border); padding:1rem; border-radius:10px;">
+          <div><strong>Raw error description:</strong></div>
+          <pre id="js-rawError" style="white-space:pre-wrap;word-break:break-word;margin:.5rem 0 1rem; font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace; background:rgba(0,0,0,.15); padding:.75rem; border-radius:8px; max-height:240px; overflow:auto;">(none)</pre>
+          <div id="js-derivedMessageWrap" class="hidden"><strong>Derived explanation:</strong>
+            <div id="js-derivedMessage" style="margin-top:.35rem;"></div>
+          </div>
+        </div>
+      </details>
+    </section>
+    <footer>
+      <p>For security we purposely limit technical detail on this page. Reference IDs aid internal troubleshooting.</p>
+    </footer>
+  </main>
+
+  <script>
+    (function(){
+      const get = id => document.getElementById(id);
+      const safe = v => (v === undefined || v === null || v === '' ? '\u2014' : (''+v).trim());
+
+      function fromHiddenField(name){
+        const el = document.querySelector(`[name="${name}"]`) || document.querySelector(`#${name}`);
+        return el ? (el.value || el.textContent || '').trim() : '';
+      }
+
+      function fromQueryString(key){
+        const params = new URLSearchParams(window.location.search);
+        return params.get(key) || '';
+      }
+
+      function resolveValue(keys){
+        for (const k of keys){
+          const v = fromHiddenField(k) || fromQueryString(k) || fromQueryString(k.toLowerCase()) || fromQueryString(k.replace(/[A-Z]/g, m => '_' + m.toLowerCase()));
+          if (v) return v; }
+        return '';
+      }
+
+      const correlationId = resolveValue(['correlationId','correlation_id']);
+      const errorCode = resolveValue(['journeyErrorCode','error_code','code']);
+      const errorMessage = resolveValue(['journeyErrorMessage','error_message','message']);
+      const retryAfter = resolveValue(['journeyRetryAfter','retry_after']);
+      const supportLink = resolveValue(['journeySupportLink','support_link']);
+      const rawErrorDescription = resolveValue(['error_description','ErrorDescription','errorDescription']);
+
+      get('js-correlationId').textContent = safe(correlationId);
+      get('js-errorCode').textContent = safe(errorCode);
+      get('js-timestamp').textContent = new Date().toISOString().replace('T',' ').replace('Z','Z');
+
+      const userMsgEl = get('js-userMessage');
+      if (errorMessage) userMsgEl.textContent = errorMessage; else userMsgEl.textContent = userMsgEl.textContent;
+
+      // Display raw error description (if any)
+      if (rawErrorDescription){
+        get('js-rawError').textContent = rawErrorDescription;
+      }
+
+      // Attempt to derive an error code from raw description if not already present
+      let derivedCode = errorCode;
+      if (!derivedCode && rawErrorDescription){
+        const match = rawErrorDescription.match(/(AADB2C\d{5})/i);
+        if (match) derivedCode = match[1];
+        if (derivedCode) get('js-errorCode').textContent = derivedCode;
+      }
+
+      // Map common Azure AD B2C error codes to friendlier explanations
+      const codeMap = {
+        'AADB2C90118': 'The user selected the link to reset their password. Provide a password reset policy link or invoke the password reset user journey.',
+        'AADB2C90091': 'The user cancelled the operation. They closed the window or chose a cancel link.',
+        'AADB2C90037': 'User account is locked. This can happen after repeated invalid attempts. Wait and retry or contact support.',
+        'AADB2C99002': 'The request is missing a required parameter or is malformed.',
+        'AADB2C99003': 'The supplied query string or state was too long or contained invalid data.',
+        'AADB2C90273': 'The correlation or transaction timed out. Network latency or service issue may have occurred.',
+        'AADB2C90157': 'A required claim is missing from the request. Check technical profile outputs and input claims.',
+        'AADB2C20001': 'An unspecified error occurred in a REST API or technical profile.',
+        'AADB2C:Throttled': 'The request was throttled due to rate limits. Use the Retry-After guidance shown above before attempting again.'
+      };
+
+      function deriveFriendlyMessage(code){
+        if (!code) return '';
+        // Normalize key
+        const k = code.replace(/:.*/,'');
+        return codeMap[code] || codeMap[k] || '';
+      }
+
+      const derivedMessage = deriveFriendlyMessage(derivedCode);
+      if (derivedMessage){
+        const wrap = get('js-derivedMessageWrap');
+        wrap.classList.remove('hidden');
+        get('js-derivedMessage').textContent = derivedMessage;
+      }
+
+      if (supportLink){
+        let linkHtml = supportLink;
+        if (/^https?:\/\//i.test(supportLink)) {
+          const esc = supportLink.replace(/"/g,'&quot;');
+            linkHtml = `<a href="${esc}" target="_blank" rel="noopener noreferrer">Open Support Portal</a>`;
+        }
+        get('js-supportLink').innerHTML = linkHtml;
+      } else {
+        get('js-supportLink').textContent = '—';
+      }
+
+      if (retryAfter){
+        const secs = parseInt(retryAfter, 10);
+        if (!isNaN(secs) && secs > 0) {
+          get('js-retryAfter').textContent = secs;
+          get('js-retryAfterWrap').classList.remove('hidden');
+          disableRetry(secs);
+        }
+      }
+
+      const btnRetry = get('btnRetry');
+      btnRetry.addEventListener('click', () => {
+        // Attempt navigation back. If within an iFrame (B2C), post a cancel event.
+        try { if (window.parent && window.parent !== window) { window.parent.postMessage({ action: 'retry', correlationId }, '*'); } } catch(_){}
+        // Fallback: reload
+        window.location.reload();
+      });
+
+      get('btnClose').addEventListener('click', () => {
+        // Attempt to close, fallback to about:blank
+        window.open('', '_self');
+        window.close();
+        setTimeout(()=>{ window.location.href = 'about:blank'; }, 350);
+      });
+
+      function disableRetry(seconds){
+        btnRetry.disabled = true;
+        const hint = get('js-retryHint');
+        hint.hidden = false;
+        let remaining = seconds;
+        const original = btnRetry.textContent;
+        btnRetry.textContent = `Try Again (${remaining})`;
+        const timer = setInterval(()=>{
+          remaining--;
+          if (remaining <= 0){
+            clearInterval(timer);
+            btnRetry.disabled = false;
+            btnRetry.textContent = original;
+            hint.hidden = true;
+            get('js-retryAfterWrap').classList.add('hidden');
+          } else {
+            btnRetry.textContent = `Try Again (${remaining})`;
+            get('js-retryAfter').textContent = remaining;
+          }
+        },1000);
+      }
+
+      // Basic dark-mode preference support
+      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches){
+        document.documentElement.setAttribute('data-theme','light');
+      } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches){
+        document.documentElement.setAttribute('data-theme','dark');
+      }
+    })();
+  </script>
+</body>
+</html>

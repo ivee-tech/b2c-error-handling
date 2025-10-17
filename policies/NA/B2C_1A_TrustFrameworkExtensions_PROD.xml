@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Production variant referencing REST-IDM-UserValidation-Prod (mTLS) -->
+<!-- Derived from B2C_1A_TrustFrameworkExtensions_v1_2_0.xml -->
+<TrustFrameworkPolicy
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="http://schemas.microsoft.com/online/cpim/schemas/2013/06"
+    PolicySchemaVersion="0.3.0.0"
+    TenantId="zipzappmetadatadev.onmicrosoft.com"
+    PolicyId="B2C_1A_TrustFrameworkExtensions_PROD"
+    PublicPolicyUri="http://zipzappmetadatadev.onmicrosoft.com/B2C_1A_TrustFrameworkExtensions_PROD">
+  <BasePolicy>
+    <TenantId>zipzappmetadatadev.onmicrosoft.com</TenantId>
+    <PolicyId>B2C_1A_TrustFrameworkBase_v1_2_0</PolicyId>
+  </BasePolicy>
+  <BuildingBlocks />
+  <ClaimsProviders>
+    <ClaimsProvider>
+      <DisplayName>IDM REST API</DisplayName>
+      <TechnicalProfiles>
+        <TechnicalProfile Id="REST-IDM-UserValidation-Prod">
+          <DisplayName>IDM User Validation (Prod - mTLS)</DisplayName>
+          <Protocol Name="Proprietary" Handler="Web.TPEngine.Providers.RestfulProvider,Web.TPEngine" />
+          <Metadata>
+            <Item Key="ServiceUrl">https://idm-api.example.com/users/validate</Item>
+            <Item Key="AuthenticationType">ClientCertificate</Item>
+            <Item Key="SendClaimsIn">Body</Item>
+            <Item Key="AllowInsecureAuthInProduction">false</Item>
+            <Item Key="ServiceTimeoutInMilliseconds">5000</Item>
+            <Item Key="RetryPolicy-NumberOfRetries">0</Item>
+            <Item Key="ResolveJsonPathsInJsonTokens">true</Item>
+          </Metadata>
+          <CryptographicKeys>
+            <Key Id="ClientCertificate" StorageReferenceId="B2C_1A_IDMApiClientCertificate" />
+          </CryptographicKeys>
+          <InputClaims>
+            <InputClaim ClaimTypeReferenceId="email" PartnerClaimType="email" />
+            <InputClaim ClaimTypeReferenceId="correlationId" PartnerClaimType="correlationId" />
+          </InputClaims>
+          <OutputClaims>
+            <OutputClaim ClaimTypeReferenceId="idmUserExists" PartnerClaimType="userExists" />
+            <OutputClaim ClaimTypeReferenceId="idmUserId" PartnerClaimType="userId" />
+            <OutputClaim ClaimTypeReferenceId="journeyErrorMessage" PartnerClaimType="userMessage" />
+            <OutputClaim ClaimTypeReferenceId="journeyErrorCode" PartnerClaimType="errorCode" />
+            <OutputClaim ClaimTypeReferenceId="journeyHasError" PartnerClaimType="journeyHasError" />
+            <OutputClaim ClaimTypeReferenceId="journeyRetryAfter" PartnerClaimType="retryAfter" />
+          </OutputClaims>
+        </TechnicalProfile>
+      </TechnicalProfiles>
+    </ClaimsProvider>
+  </ClaimsProviders>
+</TrustFrameworkPolicy>

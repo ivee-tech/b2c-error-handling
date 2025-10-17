@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TrustFrameworkPolicy
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="http://schemas.microsoft.com/online/cpim/schemas/2013/06"
+    PolicySchemaVersion="0.3.0.0"
+  TenantId="zipzappmetadatadev.onmicrosoft.com"
+    PolicyId="B2C_1A_TrustFrameworkExtensions_v1_2_0"
+  PublicPolicyUri="http://zipzappmetadatadev.onmicrosoft.com/B2C_1A_TrustFrameworkExtensions_v1_2_0">
+
+  <BasePolicy>
+    <TenantId>zipzappmetadatadev.onmicrosoft.com</TenantId>
+    <PolicyId>B2C_1A_TrustFrameworkBase_v1_2_0</PolicyId>
+  </BasePolicy>
+
+  <BuildingBlocks />
+
+  <ClaimsProviders>
+    <ClaimsProvider>
+      <DisplayName>IDM REST API</DisplayName>
+      <TechnicalProfiles>
+        <!-- Development (local) variant: switched to Basic auth against local API.
+             For production restore ClientCertificate auth (see commented production block below or use separate profile). -->
+        <TechnicalProfile Id="REST-IDM-UserValidation">
+          <DisplayName>IDM User Validation (Dev - Basic Auth)</DisplayName>
+          <Protocol Name="Proprietary" Handler="Web.TPEngine.Providers.RestfulProvider,Web.TPEngine" />
+          <Metadata>
+            <!-- Local backend listening on port 7071 per launchSettings.json -->
+            <Item Key="ServiceUrl">http://localhost:7071/users/validate</Item>
+            <Item Key="AuthenticationType">Basic</Item>
+            <Item Key="SendClaimsIn">Body</Item>
+            <Item Key="AllowInsecureAuthInProduction">false</Item>
+            <Item Key="ServiceTimeoutInMilliseconds">5000</Item>
+            <Item Key="RetryPolicy-NumberOfRetries">0</Item>
+            <Item Key="ResolveJsonPathsInJsonTokens">true</Item>
+          </Metadata>
+          <CryptographicKeys>
+            <!-- Create these policy keys in B2C: B2C_1A_IdmApiBasicUsername / B2C_1A_IdmApiBasicPassword -->
+            <Key Id="BasicAuthenticationUsername" StorageReferenceId="B2C_1A_IdmApiBasicUsername" />
+            <Key Id="BasicAuthenticationPassword" StorageReferenceId="B2C_1A_IdmApiBasicPassword" />
+          </CryptographicKeys>
+          <InputClaims>
+            <InputClaim ClaimTypeReferenceId="email" PartnerClaimType="email" />
+            <InputClaim ClaimTypeReferenceId="correlationId" PartnerClaimType="correlationId" />
+          </InputClaims>
+          <OutputClaims>
+            <OutputClaim ClaimTypeReferenceId="idmUserExists" PartnerClaimType="userExists" />
+            <OutputClaim ClaimTypeReferenceId="idmUserId" PartnerClaimType="userId" />
+            <OutputClaim ClaimTypeReferenceId="journeyErrorMessage" PartnerClaimType="userMessage" />
+            <OutputClaim ClaimTypeReferenceId="journeyErrorCode" PartnerClaimType="errorCode" />
+            <OutputClaim ClaimTypeReferenceId="journeyHasError" PartnerClaimType="journeyHasError" />
+            <!-- Added optional retryAfter mapping; when present will drive countdown on custom error page -->
+            <OutputClaim ClaimTypeReferenceId="journeyRetryAfter" PartnerClaimType="retryAfter" />
+          </OutputClaims>
+        </TechnicalProfile>
+
+        <!-- Production (certificate) variant retained for easy switch-over. To use in production either:
+             1. Replace the above dev profile with this block (renaming Id to REST-IDM-UserValidation), OR
+             2. Reference this Id in the orchestration step instead of the dev one.
+        <TechnicalProfile Id="REST-IDM-UserValidation-Prod">
+          <DisplayName>IDM User Validation (Prod - mTLS)</DisplayName>
+          <Protocol Name="Proprietary" Handler="Web.TPEngine.Providers.RestfulProvider,Web.TPEngine" />
+          <Metadata>
+            <Item Key="ServiceUrl">https://idm-api.example.com/users/validate</Item>
+            <Item Key="AuthenticationType">ClientCertificate</Item>
+            <Item Key="SendClaimsIn">Body</Item>
+            <Item Key="AllowInsecureAuthInProduction">false</Item>
+            <Item Key="ServiceTimeoutInMilliseconds">5000</Item>
+            <Item Key="RetryPolicy-NumberOfRetries">0</Item>
+            <Item Key="ResolveJsonPathsInJsonTokens">true</Item>
+          </Metadata>
+          <CryptographicKeys>
+            <Key Id="ClientCertificate" StorageReferenceId="B2C_1A_IDMApiClientCertificate" />
+          </CryptographicKeys>
+          <InputClaims>
+            <InputClaim ClaimTypeReferenceId="email" PartnerClaimType="email" />
+            <InputClaim ClaimTypeReferenceId="correlationId" PartnerClaimType="correlationId" />
+          </InputClaims>
+          <OutputClaims>
+            <OutputClaim ClaimTypeReferenceId="idmUserExists" PartnerClaimType="userExists" />
+            <OutputClaim ClaimTypeReferenceId="idmUserId" PartnerClaimType="userId" />
+            <OutputClaim ClaimTypeReferenceId="journeyErrorMessage" PartnerClaimType="userMessage" />
+            <OutputClaim ClaimTypeReferenceId="journeyErrorCode" PartnerClaimType="errorCode" />
+            <OutputClaim ClaimTypeReferenceId="journeyHasError" PartnerClaimType="journeyHasError" />
+            <OutputClaim ClaimTypeReferenceId="journeyRetryAfter" PartnerClaimType="retryAfter" />
+          </OutputClaims>
+        </TechnicalProfile> -->
+
+        <!-- Sample error simulation technical profile used for testing custom error page behavior.
+             Invoke in a temporary orchestration step (ClaimsExchange) before SendClaims and error handler.
+             Returns journeyHasError=true along with journeyErrorCode, journeyErrorMessage, and optional journeyRetryAfter. -->
+        <TechnicalProfile Id="REST-IDM-ErrorSimulation">
+          <DisplayName>IDM Error Simulation</DisplayName>
+          <Protocol Name="Proprietary" Handler="Web.TPEngine.Providers.RestfulProvider,Web.TPEngine" />
+          <Metadata>
+            <!-- Replace host with your locally running API when testing (e.g. http://localhost:5080/users/simulate-error) -->
+            <Item Key="ServiceUrl">https://idm-api.example.com/users/simulate-error</Item>
+            <Item Key="AuthenticationType">ClientCertificate</Item>
+            <Item Key="SendClaimsIn">Body</Item>
+            <Item Key="AllowInsecureAuthInProduction">false</Item>
+            <Item Key="ServiceTimeoutInMilliseconds">5000</Item>
+            <Item Key="RetryPolicy-NumberOfRetries">0</Item>
+            <Item Key="ResolveJsonPathsInJsonTokens">true</Item>
+          </Metadata>
+          <CryptographicKeys>
+            <Key Id="ClientCertificate" StorageReferenceId="B2C_1A_IDMApiClientCertificate" />
+          </CryptographicKeys>
+          <InputClaims>
+            <InputClaim ClaimTypeReferenceId="correlationId" PartnerClaimType="correlationId" />
+          </InputClaims>
+          <OutputClaims>
+            <OutputClaim ClaimTypeReferenceId="journeyErrorMessage" PartnerClaimType="userMessage" />
+            <OutputClaim ClaimTypeReferenceId="journeyErrorCode" PartnerClaimType="errorCode" />
+            <OutputClaim ClaimTypeReferenceId="journeyHasError" PartnerClaimType="journeyHasError" />
+            <OutputClaim ClaimTypeReferenceId="journeyRetryAfter" PartnerClaimType="retryAfter" />
+          </OutputClaims>
+        </TechnicalProfile>
+      </TechnicalProfiles>
+    </ClaimsProvider>
+
+    <ClaimsProvider>
+      <DisplayName>Dynamics CRM API</DisplayName>
+      <TechnicalProfiles>
+        <TechnicalProfile Id="REST-CRM-ContactCreation">
+          <DisplayName>CRM Contact Creation</DisplayName>
+          <Protocol Name="Proprietary" Handler="Web.TPEngine.Providers.RestfulProvider,Web.TPEngine" />
+          <Metadata>
+            <Item Key="ServiceUrl">https://crm-api.example.com/contacts</Item>
+            <Item Key="AuthenticationType">ClientCertificate</Item>
+            <Item Key="SendClaimsIn">Body</Item>
+            <Item Key="AllowInsecureAuthInProduction">false</Item>
+            <Item Key="ServiceTimeoutInMilliseconds">30000</Item>
+            <Item Key="RetryPolicy-NumberOfRetries">0</Item>
+            <Item Key="ResolveJsonPathsInJsonTokens">true</Item>
+          </Metadata>
+          <CryptographicKeys>
+            <Key Id="ClientCertificate" StorageReferenceId="B2C_1A_CRMApiClientCertificate" />
+          </CryptographicKeys>
+          <InputClaims>
+            <InputClaim ClaimTypeReferenceId="email" PartnerClaimType="email" />
+            <InputClaim ClaimTypeReferenceId="givenName" PartnerClaimType="givenName" />
+            <InputClaim ClaimTypeReferenceId="surname" PartnerClaimType="surname" />
+            <InputClaim ClaimTypeReferenceId="phoneNumber" PartnerClaimType="phoneNumber" />
+            <InputClaim ClaimTypeReferenceId="idempotencyKey" PartnerClaimType="idempotencyKey" />
+            <InputClaim ClaimTypeReferenceId="correlationId" PartnerClaimType="correlationId" />
+          </InputClaims>
+          <OutputClaims>
+            <OutputClaim ClaimTypeReferenceId="crmContactId" PartnerClaimType="contactId" />
+            <OutputClaim ClaimTypeReferenceId="crmStatus" PartnerClaimType="status" />
+            <OutputClaim ClaimTypeReferenceId="journeyErrorMessage" PartnerClaimType="userMessage" />
+            <OutputClaim ClaimTypeReferenceId="journeyErrorCode" PartnerClaimType="errorCode" />
+            <OutputClaim ClaimTypeReferenceId="journeyRetryAfter" PartnerClaimType="retryAfter" />
+            <OutputClaim ClaimTypeReferenceId="journeyHasError" PartnerClaimType="journeyHasError" />
+          </OutputClaims>
+        </TechnicalProfile>
+      </TechnicalProfiles>
+    </ClaimsProvider>
+
+    <ClaimsProvider>
+      <DisplayName>Legacy Directory</DisplayName>
+      <TechnicalProfiles>
+        <TechnicalProfile Id="REST-LegacyPasswordValidation">
+          <DisplayName>Legacy Password Validation</DisplayName>
+          <Protocol Name="Proprietary" Handler="Web.TPEngine.Providers.RestfulProvider,Web.TPEngine" />
+          <Metadata>
+            <Item Key="ServiceUrl">https://legacy-idm.example.com/password/validate</Item>
+            <Item Key="AuthenticationType">ClientCertificate</Item>
+            <Item Key="SendClaimsIn">Body</Item>
+            <Item Key="AllowInsecureAuthInProduction">false</Item>
+            <Item Key="ServiceTimeoutInMilliseconds">10000</Item>
+            <Item Key="RetryPolicy-NumberOfRetries">0</Item>
+            <Item Key="ResolveJsonPathsInJsonTokens">true</Item>
+          </Metadata>
+          <CryptographicKeys>
+            <Key Id="ClientCertificate" StorageReferenceId="B2C_1A_LegacyDirectoryCertificate" />
+          </CryptographicKeys>
+          <InputClaims>
+            <InputClaim ClaimTypeReferenceId="signInName" PartnerClaimType="userName" />
+            <InputClaim ClaimTypeReferenceId="password" PartnerClaimType="password" />
+            <InputClaim ClaimTypeReferenceId="correlationId" PartnerClaimType="correlationId" />
+          </InputClaims>
+          <OutputClaims>
+            <OutputClaim ClaimTypeReferenceId="legacyPasswordValidated" PartnerClaimType="validated" />
+            <OutputClaim ClaimTypeReferenceId="journeyErrorMessage" PartnerClaimType="userMessage" />
+            <OutputClaim ClaimTypeReferenceId="journeyErrorCode" PartnerClaimType="errorCode" />
+            <OutputClaim ClaimTypeReferenceId="journeyHasError" PartnerClaimType="journeyHasError" />
+          </OutputClaims>
+        </TechnicalProfile>
+      </TechnicalProfiles>
+    </ClaimsProvider>
+
+    <ClaimsProvider>
+      <DisplayName>Application Insights Logger</DisplayName>
+      <TechnicalProfiles>
+        <TechnicalProfile Id="ApplicationInsights-Logger">
+          <DisplayName>Application Insights Logger</DisplayName>
+          <Protocol Name="Proprietary" Handler="Web.TPEngine.Providers.ApplicationInsightsProvider,Web.TPEngine" />
+          <Metadata>
+            <Item Key="InstrumentationKey">00000000-0000-0000-0000-000000000000</Item>
+            <Item Key="LogLevel">Information</Item>
+          </Metadata>
+          <InputClaims>
+            <InputClaim ClaimTypeReferenceId="correlationId" PartnerClaimType="correlationId" />
+            <InputClaim ClaimTypeReferenceId="idempotencyKey" PartnerClaimType="idempotencyKey" />
+            <InputClaim ClaimTypeReferenceId="crmStatus" PartnerClaimType="crmStatus" />
+            <InputClaim ClaimTypeReferenceId="journeyErrorCode" PartnerClaimType="errorCode" />
+            <InputClaim ClaimTypeReferenceId="journeyErrorMessage" PartnerClaimType="userMessage" />
+          </InputClaims>
+        </TechnicalProfile>
+      </TechnicalProfiles>
+    </ClaimsProvider>
+  </ClaimsProviders>
+
+  <UserJourneys>
+    <UserJourney Id="SignUpSignIn">
+      <OrchestrationSteps>
+        <OrchestrationStep Order="1" Type="ClaimsExchange">
+          <ClaimsExchanges>
+            <ClaimsExchange Id="SelfAsserted-SignUp" TechnicalProfileReferenceId="LocalAccountSignUpWithLogonEmail" />
+          </ClaimsExchanges>
+        </OrchestrationStep>
+
+        <OrchestrationStep Order="2" Type="ClaimsExchange">
+          <ClaimsExchanges>
+            <ClaimsExchange Id="IDM-User-Validation" TechnicalProfileReferenceId="REST-IDM-UserValidation" />
+          </ClaimsExchanges>
+        </OrchestrationStep>
+
+        <!-- CRM Contact Creation step removed (previously Order=3) to disable external CRM integration. -->
+        <OrchestrationStep Order="3" Type="ClaimsExchange">
+          <Preconditions>
+            <Precondition Type="ClaimEquals" ExecuteActionsIf="true">
+              <Value>journeyHasError</Value>
+              <Value>true</Value>
+              <Action>SkipThisOrchestrationStep</Action>
+            </Precondition>
+            <Precondition Type="ClaimEquals" ExecuteActionsIf="true">
+              <Value>idmUserExists</Value>
+              <Value>true</Value>
+              <Action>SkipThisOrchestrationStep</Action>
+            </Precondition>
+          </Preconditions>
+          <ClaimsExchanges>
+            <ClaimsExchange Id="Create-B2C-User" TechnicalProfileReferenceId="AAD-UserWriteUsingLogonEmail" />
+          </ClaimsExchanges>
+        </OrchestrationStep>
+
+        <OrchestrationStep Order="4" Type="ClaimsExchange">
+          <ClaimsExchanges>
+            <ClaimsExchange Id="Telemetry-Log" TechnicalProfileReferenceId="ApplicationInsights-Logger" />
+          </ClaimsExchanges>
+        </OrchestrationStep>
+
+        <OrchestrationStep Order="5" Type="SendClaims" CpimIssuerTechnicalProfileReferenceId="JwtIssuer">
+          <Preconditions>
+            <Precondition Type="ClaimEquals" ExecuteActionsIf="true">
+              <Value>journeyHasError</Value>
+              <Value>true</Value>
+              <Action>SkipThisOrchestrationStep</Action>
+            </Precondition>
+          </Preconditions>
+        </OrchestrationStep>
+
+        <OrchestrationStep Order="6" Type="ClaimsExchange">
+          <Preconditions>
+            <Precondition Type="ClaimEquals" ExecuteActionsIf="true">
+              <Value>journeyHasError</Value>
+              <Value>false</Value>
+              <Action>SkipThisOrchestrationStep</Action>
+            </Precondition>
+          </Preconditions>
+          <ClaimsExchanges>
+            <ClaimsExchange Id="SelfAsserted-Error" TechnicalProfileReferenceId="SelfAsserted-ErrorHandler" />
+          </ClaimsExchanges>
+        </OrchestrationStep>
+      </OrchestrationSteps>
+      <ClientDefinition ReferenceId="DefaultWeb" />
+    </UserJourney>
+  </UserJourneys>
+</TrustFrameworkPolicy>

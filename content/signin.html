@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Sign in</title>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    :root { --accent:#0a6cf1; --danger:#b00020; --warning:#c78200; --surface:#ffffff; --bg:#f5f7fa; }
+    body { font-family: system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif; margin:0; background:var(--bg); color:#222; }
+    .container { max-width:440px; margin:48px auto 56px; padding:40px 44px 48px; background:var(--surface); border-radius:16px; box-shadow:0 4px 16px rgba(0,0,0,.06),0 1px 3px rgba(0,0,0,.08); }
+    h1 { font-size:1.45rem; margin:0 0 1.2rem; letter-spacing:.5px; }
+    form { margin-top:1.2rem; }
+    button, input[type=email], input[type=text], input[type=password] { font:inherit; width:100%; box-sizing:border-box; border-radius:8px; padding:11px 14px; }
+    input[type=email], input[type=text], input[type=password] { border:1px solid #c9d2dc; background:#fff; transition:border-color .18s, box-shadow .18s; }
+    input:focus { outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(10,108,241,.25); }
+    button.primary { background:var(--accent); border:none; color:#fff; cursor:pointer; margin-top:.75rem; font-weight:600; letter-spacing:.4px; }
+    button.primary:hover { filter:brightness(1.07); }
+    .foot { margin-top:2.25rem; font-size:.72rem; opacity:.7; text-align:center; }
+    .error-shell { margin-bottom:1rem; }
+    .error-panel { position:relative; border:1px solid var(--danger); background:linear-gradient(135deg,#fff5f6,#ffecec); color:#4a0d12; border-radius:10px; padding:14px 16px 18px; animation:fadeIn .45s ease; box-shadow:0 2px 6px rgba(0,0,0,.07); }
+    .error-panel h2 { margin:0 0 .25rem; font-size:.95rem; font-weight:640; letter-spacing:.4px; }
+    .error-panel code { background:#fff; padding:2px 5px; border-radius:4px; font-size:.72rem; color:#b00020; }
+    .error-panel ul { margin:.4rem 0 0 .95rem; padding:0; font-size:.72rem; line-height:1.15rem; }
+    .error-actions { display:flex; flex-wrap:wrap; gap:.5rem; margin-top:.85rem; }
+    .error-actions button { flex:1 1 auto; min-width:120px; font-size:.75rem; padding:8px 10px; border-radius:22px; border:1px solid #d2dae2; background:#fff; cursor:pointer; }
+    .error-actions button:hover { background:#f4f6f9; }
+    .details { font-size:.68rem; background:#fff; border:1px solid #dcdfe4; border-radius:6px; margin-top:.75rem; padding:.55rem .65rem .7rem; display:none; line-height:1.15rem; }
+    .details.visible { display:block; animation:fadeIn .35s ease; }
+    .chip { display:inline-block; background:#eef3fb; border:1px solid #d6e3f9; color:#214b78; font-size:.52rem; font-weight:600; padding:1px 8px 2px; border-radius:999px; letter-spacing:.5px; margin-right:.4rem; }
+    .badge-critical { background:#fdf2f4; border-color:#f5c3c8; color:#7d121c; }
+    .fade { animation:fadeIn .55s ease; }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(4px);} to { opacity:1; transform:translateY(0);} }
+    .hidden { display:none !important; }
+    .mapping { font-size:.62rem; margin-top:.6rem; }
+  </style>
+</head>
+<body>
+  <main class="container" role="main">
+    <h1 id="pageTitle">Sign in</h1>
+    <div id="enhancedError" class="error-shell hidden" aria-live="assertive"></div>
+    <!-- B2C injects the self-asserted form markup below (username/password, buttons, etc.) -->
+    <div id="api" class="fade"></div>
+    <div class="foot">Contoso • Security-first authentication experience</div>
+  </main>
+  <script>
+    (function(){
+      const codeMap = {
+        'AADB2C90034':'Your session expired. Please start again.',
+        'AADB2C90047':'Invalid username or password.',
+        'AADB2C90118':'Password reset required. Use "Forgot your password?"',
+        'AADB2C90053':'We can\'t find that account. Check the spelling or sign up.',
+        'idm.user.blocked':'This account has been blocked. Contact support.',
+        'idm.user.notFound':'We can\'t find that account.',
+        'idm.email.required':'Enter an email address.',
+        'idm.request.null':'Invalid sign in request.'
+      };
+      const friendly = k => codeMap[k] || null;
+
+      function buildPanel(rawMsg, rawCode){
+        const container = document.getElementById('enhancedError');
+        container.classList.remove('hidden');
+        const div = document.createElement('div');
+        div.className = 'error-panel';
+        const code = rawCode || extractCode(rawMsg);
+        const msg = rawMsg || (code ? friendly(code) : null) || 'An unexpected error occurred.';
+        const friendlyMsg = code ? (friendly(code) || msg) : msg;
+        div.innerHTML = `
+          <h2><span class="chip badge-critical">ERROR</span>${escapeHtml(friendlyMsg)}</h2>
+          <div class="mapping">${ code ? `<code>${code}</code>` : '' }</div>
+          <div class="error-actions">
+            <button type="button" id="toggleDetails">Details</button>
+            <button type="button" id="retryBtn">Try again</button>
+          </div>
+          <div id="detailBox" class="details" aria-hidden="true"></div>
+        `;
+        container.innerHTML = '';
+        container.appendChild(div);
+        const detailBox = div.querySelector('#detailBox');
+        const toggleBtn = div.querySelector('#toggleDetails');
+        toggleBtn.addEventListener('click', () => {
+          detailBox.classList.toggle('visible');
+          detailBox.setAttribute('aria-hidden', !detailBox.classList.contains('visible'));
+        });
+        div.querySelector('#retryBtn').addEventListener('click', () => {
+          // Remove error and re-enable base form errors
+          container.classList.add('hidden');
+          container.innerHTML='';
+          clearPageLevelErrors();
+          focusFirstInput();
+        });
+        detailBox.innerHTML = `
+          <strong>Raw message</strong><br>${escapeHtml(rawMsg||'(none)')}<br><br>
+          <strong>Derived code</strong><br>${escapeHtml(code||'(none)')}<br><br>
+          <strong>Correlation Id</strong><br>${escapeHtml(findCorrelationId()||'(not supplied)')}
+        `;
+      }
+      function escapeHtml(s){return s? s.replace(/[&<>'"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;","\"":"&quot;"}[c])):'';}
+      function extractCode(t){ if(!t) return null; const m = t.match(/(AADB2C\d{5})|idm\.[a-zA-Z0-9_.-]+/); return m? m[0]:null; }
+      function clearPageLevelErrors(){ const ple=document.getElementById('pageLevelErrors'); if(ple) ple.innerHTML=''; }
+      function focusFirstInput(){ const first=document.querySelector('input[type=email],input[name=signInName],input[type=text]'); if(first) first.focus(); }
+      function findCorrelationId(){
+        // Try query parameter or hidden input if later added
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get('correlationId');
+      }
+      function detectAndEnhance(){
+        const ple = document.getElementById('pageLevelErrors');
+        if(!ple) return;
+        const raw = ple.textContent.trim();
+        if(!raw) return; // nothing to enhance
+        // Skip if already enhanced (avoid loops)
+        if(document.getElementById('enhancedError') && !document.getElementById('enhancedError').classList.contains('hidden')) return;
+        buildPanel(raw);
+      }
+      const mo = new MutationObserver(()=>detectAndEnhance());
+      const tryAttach = () => {
+        const api = document.getElementById('api');
+        if(api){ mo.observe(api,{subtree:true,childList:true,characterData:true}); detectAndEnhance(); }
+        else setTimeout(tryAttach, 50);
+      };
+      tryAttach();
+    })();
+  </script>
+</body>
+</html>

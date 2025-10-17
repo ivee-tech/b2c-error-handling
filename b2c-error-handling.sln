@@ -1,0 +1,30 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Contoso.IdentityApi", "backend\Contoso.IdentityApi\Contoso.IdentityApi.csproj", "{155DC5EB-97A7-EFFA-9758-2B54BC63B60A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Contoso.IdentityApi.Tests", "backend\Contoso.IdentityApi.Tests\Contoso.IdentityApi.Tests.csproj", "{885590CE-E398-03F7-A470-0F9D33FACB53}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{155DC5EB-97A7-EFFA-9758-2B54BC63B60A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{155DC5EB-97A7-EFFA-9758-2B54BC63B60A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{155DC5EB-97A7-EFFA-9758-2B54BC63B60A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{155DC5EB-97A7-EFFA-9758-2B54BC63B60A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{885590CE-E398-03F7-A470-0F9D33FACB53}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{885590CE-E398-03F7-A470-0F9D33FACB53}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{885590CE-E398-03F7-A470-0F9D33FACB53}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{885590CE-E398-03F7-A470-0F9D33FACB53}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {1C84F016-9095-4F98-8F28-69AF5627787D}
+	EndGlobalSection
+EndGlobal
